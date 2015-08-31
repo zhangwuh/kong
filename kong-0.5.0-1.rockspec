@@ -96,6 +96,14 @@ build = {
     ["kong.dao.cassandra.consumers"] = "kong/dao/cassandra/consumers.lua",
     ["kong.dao.cassandra.plugins"] = "kong/dao/cassandra/plugins.lua",
 
+    ["kong.dao.postgres.factory"] = "kong/dao/postgres/factory.lua",
+    ["kong.dao.postgres.query_builder"] = "kong/dao/postgres/query_builder.lua",
+    ["kong.dao.postgres.base_dao"] = "kong/dao/postgres/base_dao.lua",
+    ["kong.dao.postgres.migrations"] = "kong/dao/postgres/migrations.lua",
+    ["kong.dao.postgres.apis"] = "kong/dao/postgres/apis.lua",
+    ["kong.dao.postgres.consumers"] = "kong/dao/postgres/consumers.lua",
+    ["kong.dao.postgres.plugins"] = "kong/dao/postgres/plugins.lua",
+
     ["kong.plugins.base_plugin"] = "kong/plugins/base_plugin.lua",
 
     ["kong.plugins.basic-auth.migrations.cassandra"] = "kong/plugins/basic-auth/migrations/cassandra.lua",
