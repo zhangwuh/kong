@@ -13,6 +13,8 @@ local error_types = constants.DATABASE_ERROR_TYPES
 
 local BaseDao = Object:extend()
 
+--for dbnull values
+local dbnull = pgmoon.new().null
 -- This is important to seed the UUID generator
 uuid.seed()
 
@@ -250,12 +252,12 @@ function BaseDao:update(t, full)
   if full then
     for k, v in pairs(self._schema.fields) do
       if not t[k] and not v.immutable then
-        t_no_primary_key[k] = postgres.null
+        t_no_primary_key[k] = dbnull
       end
     end
   end
 
-  local update_q, columns = query_builder.update(self._table, t_no_primary_key, t_primary_key)
+  local update_q, columns = query_builder.update(self._table, self:_marshall(t_no_primary_key), t_primary_key)
 
   local _, stmt_err = self:execute(update_q, columns, self:_marshall(t))
   if stmt_err then
@@ -279,7 +281,7 @@ function BaseDao:find_by_primary_key(where_t)
     return nil
   end
 
-  local select_q, where_columns = query_builder.select(self._table, t_primary_key, nil, true)
+  local select_q, where_columns = query_builder.select(self._table, t_primary_key, nil)
   local data, err = self:execute(select_q, where_columns, t_primary_key)
 
   -- Return the 1st and only element of the result set
@@ -298,9 +300,11 @@ end
 -- @param `paging_state` Start page from given offset. See lua-resty-postgres's :execute() option.
 -- @return `res`
 -- @return `err`
--- @return `filtering`   A boolean indicating if ALLOW FILTERING was needed by the query
 function BaseDao:find_by_keys(where_t, page_size, paging_state)
-  local select_q = query_builder.select(self._table, where_t, self._column_family_details)
+  local select_q = query_builder.select(self._table, where_t, nil, {
+    page_size = page_size,
+    paging_state = paging_state
+  })
   local res, err = self:execute(select_q)
   return res
 end
@@ -321,17 +325,14 @@ function BaseDao:delete(where_t)
   assert(self._primary_key ~= nil and type(self._primary_key) == "table" , "Entity does not have a primary_key")
   assert(where_t ~= nil and type(where_t) == "table", "where_t must be a table")
 
-  -- Test if exists first
-  local res, err = self:find_by_primary_key(where_t)
-  if err then
-    return false, err
-  elseif not res then
-    return false
-  end
+  -- don't need to test if exists first, this was necessary in cassandra?
 
   local t_primary_key = extract_primary_key(where_t, self._primary_key, self._clustering_key)
   local delete_q, where_columns = query_builder.delete(self._table, t_primary_key)
-  return self:execute(delete_q, where_columns, where_t)
+  local rows, err = self:execute(delete_q, where_columns, where_t)
+
+  -- did we delete anything
+  return rows.affected_rows > 0
 end
 
 -- Truncate the table of this DAO

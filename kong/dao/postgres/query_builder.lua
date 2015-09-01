@@ -81,18 +81,33 @@ local function where_fragment(where_t, no_filtering_check)
   return string.format("WHERE %s", where_parts)
 end
 
+local function paging_fragment(options)
+  local paging_str = ''
+  if not options then
+    return paging_str
+  end
+  if options.paging_state then
+    paging_str = 'OFFSET '.. options.paging_state
+  end
+  if options.page_size then
+    paging_str = paging_str .. ' LIMIT '.. options.page_size
+  end
+  return trim(paging_str)
+end
+
 -- Generate a SELECT query with an optional WHERE instruction.
 -- If building a WHERE instruction, we need some additional informations about the table.
 -- @param `table_name`         Name of the table
 -- @param `select_columns`        A list of columns to retrieve
 -- @return `query`                The SELECT query
-function _M.select(table_name, where_t, select_columns)
+function _M.select(table_name, where_t, select_columns, options)
   assert(type(table_name) == "string", "table_name must be a string")
 
   local select_str = select_fragment(table_name, select_columns)
-  local where_str, columns = where_fragment(where_t)
+  local where_str = where_fragment(where_t)
+  local paging_str = paging_fragment(options)
 
-  return trim(string.format("%s %s", select_str, where_str))
+  return trim(string.format("%s %s %s", select_str, where_str, paging_str))
 end
 
 -- Generate an INSERT query.

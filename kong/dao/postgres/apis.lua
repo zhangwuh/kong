@@ -13,15 +13,10 @@ end
 function Apis:find_all()
   local apis = {}
   local select_q = query_builder.select(self._table)
-  for _, rows, page, err in Apis.super.execute(self, select_q, nil, nil, {auto_paging=true}) do
+  local apis, err = Apis.super.execute(self, select_q)
     if err then
       return nil, err
     end
-
-    for _, row in ipairs(rows) do
-      table.insert(apis, row)
-    end
-  end
 
   return apis
 end
@@ -34,21 +29,7 @@ function Apis:delete(where_t)
   end
 
   -- delete all related plugins configurations
-  local plugins_dao = self._factory.plugins
-  local select_q, columns = query_builder.select(plugins_dao._table, {api_id = where_t.id}, plugins_dao._column_family_details)
-
-  for _, rows, page, err in plugins_dao:execute(select_q, columns, {api_id = where_t.id}, {auto_paging = true}) do
-    if err then
-      return nil, err
-    end
-
-    for _, row in ipairs(rows) do
-      local ok_del_plugin, err = plugins_dao:delete({id = row.id})
-      if not ok_del_plugin then
-        return nil, err
-      end
-    end
-  end
+  -- delete cascading should handle this
 
   return ok
 end
