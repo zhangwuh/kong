@@ -6,6 +6,7 @@ local yaml = require "yaml"
 local path = require("path").new("/")
 local stringy = require "stringy"
 local constants = require "kong.constants"
+local dao_helper = require "kong.dao"
 
 local _M = {}
 
@@ -103,7 +104,7 @@ function _M.file_size(path)
 end
 
 --- Load a yaml configuration file.
--- The return config will get 2 extra fields; `pid_file` of the nginx process 
+-- The return config will get 2 extra fields; `pid_file` of the nginx process
 -- and `dao_config` as a shortcut to the dao configuration
 -- @param configuration_path path to configuration file to load
 -- @return config Loaded configuration table
@@ -121,6 +122,9 @@ function _M.load_configuration_and_dao(configuration_path)
   if dao_config == nil then
     error('No "'..configuration.database..'" dao defined')
   end
+
+  -- set configured database in dao helper
+  dao_helper.set_database(configuration.database)
 
   -- Adding computed properties to the configuration
   configuration.pid_file = path:join(configuration.nginx_working_dir, constants.CLI.NGINX_PID)

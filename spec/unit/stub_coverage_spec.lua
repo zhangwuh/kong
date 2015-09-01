@@ -2,6 +2,7 @@
 -- since not all files are currently unit tested and the coverage is erroneous.
 
 local path = require("path").new("/")
+local spec_helper = require "spec.spec_helpers"
 require "kong.tools.ngx_stub"
 
 -- Stub DAO for lapis controllers

@@ -1,5 +1,5 @@
 local cassandra = require "cassandra"
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 local timestamp = require "kong.tools.timestamp"
 
 local ResponseRateLimitingMetrics = BaseDao:extend()

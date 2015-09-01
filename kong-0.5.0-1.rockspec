@@ -44,6 +44,8 @@ build = {
 
     ["kong.constants"] = "kong/constants.lua",
 
+    ["kong.dao"] = "kong/dao.lua",
+
     ["kong.cli.utils"] = "kong/cli/utils/utils.lua",
     ["kong.cli.utils.dnsmasq"] = "kong/cli/utils/dnsmasq.lua",
     ["kong.cli.utils.ssl"] = "kong/cli/utils/ssl.lua",
