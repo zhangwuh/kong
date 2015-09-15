@@ -90,7 +90,7 @@ local function has_table(state, arguments)
   local found = false
   rows = pg:query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';")
   for _, table in ipairs(rows) do
-    if table.table_name == arguments[1] then
+    if table.table_name == identifier then
       return true
     end
   end
@@ -145,7 +145,7 @@ describe("Migrations", function()
   end)
 
   teardown(function()
-    local rows, num_queries = pg:query([[drop schema public cascade; create schema public;]])
+    local _, num_queries = pg:query([[drop schema public cascade; create schema public;]])
     if num_queries < 2 then
       error("couldn't drop tables")
     end

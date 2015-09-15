@@ -11,7 +11,6 @@ function Apis:new(properties)
 end
 
 function Apis:find_all()
-  local apis = {}
   local select_q = query_builder.select(self._table)
   local apis, err = Apis.super.execute(self, select_q)
     if err then

@@ -2,9 +2,7 @@ local query_builder = require "kong.dao.postgres.query_builder"
 local validations = require "kong.dao.schemas_validation"
 local constants = require "kong.constants"
 local pgmoon = require "pgmoon"
-local timestamp = require "kong.tools.timestamp"
 local DaoError = require "kong.dao.error"
-local stringy = require "stringy"
 local Object = require "classic"
 local utils = require "kong.tools.utils"
 local uuid = require "uuid"
@@ -99,14 +97,12 @@ function BaseDao:_execute(query)
     return nil, err
   end
 
-  local results, errorOrRows, partial, num_queries = pg:query(query)
+  local results, errorOrRows = pg:query(query)
 
-  local rows = 0
   if string.find(errorOrRows, 'ERROR') then
     err = errorOrRows
-  else
-    rows = errorOrRows
   end
+
   if err then
     err = DaoError(err, error_types.DATABASE)
   end
@@ -144,7 +140,7 @@ function BaseDao:insert(t)
   assert(t ~= nil, "Cannot insert a nil element")
   assert(type(t) == "table", "Entity to insert must be a table")
 
-  local ok, db_err, errors, self_err
+  local ok, errors, self_err
 
   -- Populate the entity with any default/overriden values and validate it
   ok, errors, self_err = validations.validate_entity(t, self._schema, {
@@ -160,11 +156,13 @@ function BaseDao:insert(t)
       end
     end
   })
+
   if self_err then
     return nil, self_err
   elseif not ok then
     return nil, DaoError(errors, error_types.SCHEMA)
   end
+
   local insert_q = query_builder.insert(self._table, self:_marshall(t))
   local _, query_err = self:execute(insert_q)
   if query_err then
@@ -219,7 +217,7 @@ function BaseDao:update(t, full)
   assert(t ~= nil, "Cannot update a nil element")
   assert(type(t) == "table", "Entity to update must be a table")
 
-  local ok, db_err, errors, self_err
+  local ok, errors, self_err
 
   -- Check if exists to prevent upsert
   local res, err = self:find_by_primary_key(t)
@@ -305,7 +303,7 @@ function BaseDao:find_by_keys(where_t, page_size, paging_state)
     page_size = page_size,
     paging_state = paging_state
   })
-  local res, err = self:execute(select_q)
+  local res = self:execute(select_q)
   return res
 end
 
@@ -329,7 +327,7 @@ function BaseDao:delete(where_t)
 
   local t_primary_key = extract_primary_key(where_t, self._primary_key, self._clustering_key)
   local delete_q, where_columns = query_builder.delete(self._table, t_primary_key)
-  local rows, err = self:execute(delete_q, where_columns, where_t)
+  local rows = self:execute(delete_q, where_columns, where_t)
 
   -- did we delete anything
   return rows.affected_rows > 0

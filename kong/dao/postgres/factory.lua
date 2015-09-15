@@ -83,14 +83,12 @@ function PostgresFactory:execute_queries(queries)
     return DaoError(err, constants.DATABASE_ERROR_TYPES.DATABASE)
   end
 
-  local results, errorOrRows, partial, num_queries = pg:query(queries)
+  local _, errorOrRows = pg:query(queries)
 
-  local rows = 0
   if string.find(errorOrRows, 'ERROR') then
     err = errorOrRows
-  else
-    rows = errorOrRows
   end
+
   if err then
     return DaoError(err, constants.DATABASE_ERROR_TYPES.DATABASE)
   end

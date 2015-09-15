@@ -1,5 +1,3 @@
-local pgmoon = require "pgmoon"
-local stringy = require "stringy"
 local BaseDao = require "kong.dao.postgres.base_dao"
 
 local Migrations = BaseDao:extend()

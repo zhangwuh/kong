@@ -66,6 +66,7 @@ build = {
     ["kong.tools.faker"] = "kong/tools/faker.lua",
     ["kong.tools.syslog"] = "kong/tools/syslog.lua",
     ["kong.tools.ngx_stub"] = "kong/tools/ngx_stub.lua",
+    ["kong.tools.ngx_stub.socket"] = "kong/tools/ngx_stub.socket.lua",
     ["kong.tools.printable"] = "kong/tools/printable.lua",
     ["kong.tools.responses"] = "kong/tools/responses.lua",
     ["kong.tools.timestamp"] = "kong/tools/timestamp.lua",
@@ -103,6 +104,7 @@ build = {
     ["kong.dao.postgres.apis"] = "kong/dao/postgres/apis.lua",
     ["kong.dao.postgres.consumers"] = "kong/dao/postgres/consumers.lua",
     ["kong.dao.postgres.plugins"] = "kong/dao/postgres/plugins.lua",
+    ["kong.dao.postgres.schema.migrations"] = "kong/dao/postgres/schema/migrations.lua",
 
     ["kong.plugins.base_plugin"] = "kong/plugins/base_plugin.lua",
 

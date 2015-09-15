@@ -1,5 +1,4 @@
 local BaseDao = require "kong.dao.postgres.base_dao"
-local query_builder = require "kong.dao.postgres.query_builder"
 local consumers_schema = require "kong.dao.schemas.consumers"
 
 local Consumers = BaseDao:extend()

@@ -1,4 +1,4 @@
-local spec_helper = require "spec.spec_helpers"
+local _ = require "spec.spec_helpers"
 
 describe("dao", function()
   it("should load a dao as configured", function()
