@@ -1,4 +1,4 @@
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 
 local SCHEMA = {
   primary_key = {"id"},

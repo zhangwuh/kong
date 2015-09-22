@@ -1,7 +1,7 @@
 local plugins_schema = require "kong.dao.schemas.plugins"
 local query_builder = require "kong.dao.cassandra.query_builder"
 local constants = require "kong.constants"
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 local cjson = require "cjson"
 
 local Plugins = BaseDao:extend()

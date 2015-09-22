@@ -1,4 +1,4 @@
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 local consumers_schema = require "kong.dao.schemas.consumers"
 
 local Consumers = BaseDao:extend()

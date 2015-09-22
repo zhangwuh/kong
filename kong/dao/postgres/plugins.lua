@@ -51,14 +51,13 @@ function Plugins:update(t)
 end
 
 function Plugins:find_distinct()
-  -- Open session
+    -- Open session
   local session, err = Plugins.super._open_session(self)
   if err then
     return nil, err
   end
 
   local select_q = query_builder.select(self._table)
-
   -- Execute query
   local distinct_names = {}
   local rows, err = Plugins.super.execute(self, select_q)

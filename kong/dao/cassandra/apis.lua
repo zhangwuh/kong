@@ -1,4 +1,4 @@
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 local apis_schema = require "kong.dao.schemas.apis"
 local query_builder = require "kong.dao.cassandra.query_builder"
 

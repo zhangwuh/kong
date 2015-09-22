@@ -1,6 +1,6 @@
 local cassandra = require "cassandra"
 local stringy = require "stringy"
-local BaseDao = require "kong.dao.cassandra.base_dao"
+local BaseDao = require "kong.dao".BaseDao
 
 local Migrations = BaseDao:extend()
 

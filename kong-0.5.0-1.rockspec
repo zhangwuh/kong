@@ -68,7 +68,6 @@ build = {
     ["kong.tools.faker"] = "kong/tools/faker.lua",
     ["kong.tools.syslog"] = "kong/tools/syslog.lua",
     ["kong.tools.ngx_stub"] = "kong/tools/ngx_stub.lua",
-    ["kong.tools.ngx_stub.socket"] = "kong/tools/ngx_stub.socket.lua",
     ["kong.tools.printable"] = "kong/tools/printable.lua",
     ["kong.tools.responses"] = "kong/tools/responses.lua",
     ["kong.tools.timestamp"] = "kong/tools/timestamp.lua",

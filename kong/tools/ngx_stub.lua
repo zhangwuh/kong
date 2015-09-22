@@ -5,7 +5,6 @@
 -- Monkeypatches the global `ngx` table.
 
 local reg = require "rex_pcre"
-local tcp = require "kong.tools.ngx_stub.socket".tcp
 
 _G.ngx = {
   req = {},
@@ -14,7 +13,7 @@ _G.ngx = {
   exit = function() end,
   say = function() end,
   log = function() end,
-  socket = { tcp = tcp },
+  socket = { tcp = {} },
   now = function() return os.time() end,
   time = function() return os.time() end,
   timer = {
