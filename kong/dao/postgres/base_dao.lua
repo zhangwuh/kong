@@ -73,12 +73,19 @@ end
 function BaseDao:_close_session(pg)
   -- Back to the pool or close if using luasocket
   local ok, err
-  if ngx and ngx.get_phase ~= nil and ngx.get_phase() ~= "init" then
-    -- openresty
-    ok, err = pg:keepalive()
-  else
+  -- if ngx and ngx.get_phase ~= nil and ngx.get_phase() ~= "init" and ngx.socket.tcp ~= nil and ngx.socket.tcp().setkeepalive ~= nil then
+  --   -- openresty
+  -- -- something here ain't working within lapis? sock.setkeepalive is nil although we're in an ngx context
+  --   ok, err = pg:keepalive()
+  --   if not ok then
+  --     return DaoError(err, error_types.DATABASE)
+  --   end
+  -- else
     ok, err = pg:disconnect()
-  end
+    if not ok then
+      return DaoError(err, error_types.DATABASE)
+    end
+  -- end
 
   if not ok then
     return DaoError(err, error_types.DATABASE)
