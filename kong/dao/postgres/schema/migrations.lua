@@ -46,16 +46,16 @@ local Migrations = {
         CREATE TABLE IF NOT EXISTS apis(
           id uuid,
           name text,
-          inbound_dns text,
-          path text,
-          strip_path boolean,
+          request_host text,
+          request_path text,
+          strip_request_path boolean,
           upstream_url text,
           preserve_host boolean,
           created_at timestamp without time zone default (now() at time zone 'utc'),
           PRIMARY KEY (id),
           UNIQUE(name),
-          UNIQUE(inbound_dns),
-          UNIQUE(path)
+          UNIQUE(request_host),
+          UNIQUE(request_path)
         );
         DO $$
         BEGIN
@@ -65,14 +65,14 @@ local Migrations = {
           CREATE INDEX apis_name_idx ON apis(name);
         END IF;
         IF (
-          SELECT to_regclass('public.apis_dns_idx')
+          SELECT to_regclass('public.apis_request_host_idx')
             ) IS NULL THEN
-          CREATE INDEX apis_dns_idx ON apis(inbound_dns);
+          CREATE INDEX apis_request_host_idx ON apis(request_host);
         END IF;
         IF (
-          SELECT to_regclass('public.apis_path')
+          SELECT to_regclass('public.apis_request_path_idx')
             ) IS NULL THEN
-          CREATE INDEX apis_path ON apis(path);
+          CREATE INDEX apis_request_path_idx ON apis(request_path);
         END IF;
         END$$;
         CREATE TABLE IF NOT EXISTS plugins(

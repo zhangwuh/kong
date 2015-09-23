@@ -100,7 +100,7 @@ describe("Postgres", function()
 
         -- API
         api, err = dao_factory.apis:insert {
-          inbound_dns = "test.com",
+          request_host = "test.com",
           upstream_url = "http://mockbin.com"
         }
         assert.falsy(err)
@@ -238,7 +238,7 @@ describe("Postgres", function()
         assert.equal(1, #apis)
         assert.equal(api_t.id, apis[1].id)
         assert.equal(api_t.name, apis[1].name)
-        assert.equal(api_t.inbound_dns, apis[1].inbound_dns)
+        assert.equal(api_t.request_host, apis[1].request_host)
         assert.equal(api_t.upstream_url, apis[1].upstream_url)
 
         -- Consumer
@@ -285,15 +285,15 @@ describe("Postgres", function()
         assert.True(#apis > 0)
 
         local api_t = apis[1]
-        -- Should not work because we're reusing a inbound_dns
-        api_t.inbound_dns = apis[2].inbound_dns
+        -- Should not work because we're reusing a request_host
+        api_t.request_host = apis[2].request_host
         api_t.created_at = nil
 
         local api, err = dao_factory.apis:update(api_t)
         assert.truthy(err)
         assert.falsy(api)
         assert.is_daoError(err)
-        assert.True(string.find(err.message, "duplicate key value violates unique constraint \"apis_inbound_dns_key\"") > 0)
+        assert.True(string.find(err.message, "duplicate key value violates unique constraint \"apis_request_host_key\"") > 0)
       end)
 
       describe("full", function()
@@ -327,7 +327,7 @@ describe("Postgres", function()
           assert.truthy(api_t)
 
           -- Update
-          api.inbound_dns = nil
+          api.request_host = nil
 
           local nil_api, err = dao_factory.apis:update(api, true)
           assert.truthy(err)
@@ -337,7 +337,7 @@ describe("Postgres", function()
           api = session:query("SELECT * FROM apis WHERE id = '"..api.id.."'")
           assert.falsy(not api)
           assert.truthy(api[1].name)
-          assert.truthy(api[1].inbound_dns)
+          assert.truthy(api[1].request_host)
         end)
       end)
     end)  -- describe :update()
@@ -537,8 +537,8 @@ describe("Postgres", function()
         it("should find distinct plugins configurations", function()
           faker:insert_from_table {
             api = {
-              { name = "tests distinct 1", inbound_dns = "foo.com", upstream_url = "http://mockbin.com" },
-              { name = "tests distinct 2", inbound_dns = "bar.com", upstream_url = "http://mockbin.com" }
+              { name = "tests distinct 1", request_host = "foo.com", upstream_url = "http://mockbin.com" },
+              { name = "tests distinct 2", request_host = "bar.com", upstream_url = "http://mockbin.com" }
             },
             plugin = {
               { name = "key-auth", config = {key_names = {"apikey"}, hide_credentials = true}, __api = 1 },
