@@ -110,6 +110,7 @@ build = {
     ["kong.plugins.base_plugin"] = "kong/plugins/base_plugin.lua",
 
     ["kong.plugins.basic-auth.migrations.cassandra"] = "kong/plugins/basic-auth/migrations/cassandra.lua",
+    ["kong.plugins.basic-auth.migrations.postgres"] = "kong/plugins/basic-auth/migrations/postgres.lua",
     ["kong.plugins.basic-auth.crypto"] = "kong/plugins/basic-auth/crypto.lua",
     ["kong.plugins.basic-auth.handler"] = "kong/plugins/basic-auth/handler.lua",
     ["kong.plugins.basic-auth.access"] = "kong/plugins/basic-auth/access.lua",
@@ -118,6 +119,7 @@ build = {
     ["kong.plugins.basic-auth.daos"] = "kong/plugins/basic-auth/daos.lua",
 
     ["kong.plugins.key-auth.migrations.cassandra"] = "kong/plugins/key-auth/migrations/cassandra.lua",
+    ["kong.plugins.key-auth.migrations.postgres"] = "kong/plugins/key-auth/migrations/postgres.lua",
     ["kong.plugins.key-auth.handler"] = "kong/plugins/key-auth/handler.lua",
     ["kong.plugins.key-auth.access"] = "kong/plugins/key-auth/access.lua",
     ["kong.plugins.key-auth.schema"] = "kong/plugins/key-auth/schema.lua",
@@ -125,6 +127,7 @@ build = {
     ["kong.plugins.key-auth.daos"] = "kong/plugins/key-auth/daos.lua",
 
     ["kong.plugins.oauth2.migrations.cassandra"] = "kong/plugins/oauth2/migrations/cassandra.lua",
+    ["kong.plugins.oauth2.migrations.postgres"] = "kong/plugins/oauth2/migrations/postgres.lua",
     ["kong.plugins.oauth2.handler"] = "kong/plugins/oauth2/handler.lua",
     ["kong.plugins.oauth2.access"] = "kong/plugins/oauth2/access.lua",
     ["kong.plugins.oauth2.schema"] = "kong/plugins/oauth2/schema.lua",
@@ -156,12 +159,14 @@ build = {
     ["kong.plugins.mashape-analytics.buffer"] = "kong/plugins/mashape-analytics/buffer.lua",
 
     ["kong.plugins.rate-limiting.migrations.cassandra"] = "kong/plugins/rate-limiting/migrations/cassandra.lua",
+    ["kong.plugins.rate-limiting.migrations.postgres"] = "kong/plugins/rate-limiting/migrations/postgres.lua",
     ["kong.plugins.rate-limiting.handler"] = "kong/plugins/rate-limiting/handler.lua",
     ["kong.plugins.rate-limiting.access"] = "kong/plugins/rate-limiting/access.lua",
     ["kong.plugins.rate-limiting.schema"] = "kong/plugins/rate-limiting/schema.lua",
     ["kong.plugins.rate-limiting.daos"] = "kong/plugins/rate-limiting/daos.lua",
 
     ["kong.plugins.response-ratelimiting.migrations.cassandra"] = "kong/plugins/response-ratelimiting/migrations/cassandra.lua",
+    ["kong.plugins.response-ratelimiting.migrations.postgres"] = "kong/plugins/response-ratelimiting/migrations/postgres.lua",
     ["kong.plugins.response-ratelimiting.handler"] = "kong/plugins/response-ratelimiting/handler.lua",
     ["kong.plugins.response-ratelimiting.access"] = "kong/plugins/response-ratelimiting/access.lua",
     ["kong.plugins.response-ratelimiting.header_filter"] = "kong/plugins/response-ratelimiting/header_filter.lua",
@@ -198,6 +203,7 @@ build = {
     ["kong.plugins.ip-restriction.schema"] = "kong/plugins/ip-restriction/schema.lua",
 
     ["kong.plugins.acl.migrations.cassandra"] = "kong/plugins/acl/migrations/cassandra.lua",
+    ["kong.plugins.acl.migrations.postgres"] = "kong/plugins/acl/migrations/postgres.lua",
     ["kong.plugins.acl.handler"] = "kong/plugins/acl/handler.lua",
     ["kong.plugins.acl.access"] = "kong/plugins/acl/access.lua",
     ["kong.plugins.acl.schema"] = "kong/plugins/acl/schema.lua",
@@ -205,6 +211,7 @@ build = {
     ["kong.plugins.acl.daos"] = "kong/plugins/acl/daos.lua",
 
     ["kong.plugins.acl.migrations.cassandra"] = "kong/plugins/acl/migrations/cassandra.lua",
+    ["kong.plugins.acl.migrations.postgres"] = "kong/plugins/acl/migrations/postgres.lua",
     ["kong.plugins.acl.handler"] = "kong/plugins/acl/handler.lua",
     ["kong.plugins.acl.access"] = "kong/plugins/acl/access.lua",
     ["kong.plugins.acl.schema"] = "kong/plugins/acl/schema.lua",
@@ -221,6 +228,7 @@ build = {
     ["kong.api.routes.plugins"] = "kong/api/routes/plugins.lua",
 
     ["kong.plugins.jwt.migrations.cassandra"] = "kong/plugins/jwt/migrations/cassandra.lua",
+    ["kong.plugins.jwt.migrations.postgres"] = "kong/plugins/jwt/migrations/postgres.lua",
     ["kong.plugins.jwt.handler"] = "kong/plugins/jwt/handler.lua",
     ["kong.plugins.jwt.access"] = "kong/plugins/jwt/access.lua",
     ["kong.plugins.jwt.schema"] = "kong/plugins/jwt/schema.lua",
