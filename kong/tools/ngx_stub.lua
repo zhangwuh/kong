@@ -5,6 +5,7 @@
 -- Monkeypatches the global `ngx` table.
 
 local reg = require "rex_pcre"
+local crypto = require "crypto"
 
 _G.ngx = {
   req = {},
@@ -26,6 +27,9 @@ _G.ngx = {
       return res_str, sub_made
     end
   },
+  md5 = function(str)
+    return crypto.digest("md5", str)
+  end,
   -- Builds a querystring from a table, separated by `&`
   -- @param `tab`          The key/value parameters
   -- @param `key`          The parent key if the value is multi-dimensional (optional)

@@ -75,7 +75,9 @@ function PostgresFactory:execute_queries(queries)
   local pg = pgmoon.new({
     host = self._properties.hosts,
     port = self._properties.port,
-    database = self._properties.keyspace
+    database = self._properties.keyspace,
+    user = self._properties.username,
+    password = self._properties.password
   })
 
   ok, err = pg:connect()
