@@ -1,5 +1,56 @@
 ## [Unreleased][unreleased]
 
+### Added
+
+- Added a `total` field in API responses, that counts the total number of entities in the table. [#635](https://github.com/Mashape/kong/pull/635)
+- You can now specify a custom DNS resolver address that Kong will use when resolving hostnames. [#625](https://github.com/Mashape/kong/pull/635)
+
+### Changed
+
+- Removed the `dnsmasq_port` property, and introduced `dns_resolver` that also allows to specify a custom DNS server. [#625](https://github.com/Mashape/kong/pull/635)
+- The `/status` endpoint now includes `database` statistics, while the previous stats have been moved to a `server` field. [#635](https://github.com/Mashape/kong/pull/635)
+- Disabled access logs for `/status` endpoint
+
+### Fixed
+
+- In the API, the `next` link is not being displayed anymore if there are no more entities to return. [#635](https://github.com/Mashape/kong/pull/635)
+
+## [0.5.2] - 2015/10/21
+
+A few fixes requested by the community!
+
+### Fixed
+
+- Kong properly search the `nginx` in your $PATH variable.
+- Plugins:
+  - OAuth2: can detect that the originating protocol for a request was HTTPS through the `X-Forwarded-Proto` header and work behind another reverse proxy (load balancer). [#650](https://github.com/Mashape/kong/pull/650)
+  - HMAC signature: support for `X-Date` header to sign the request for usage in browsers (since the `Date` header is protected). [#641](https://github.com/Mashape/kong/issues/641)
+
+## [0.5.1] - 2015/10/13
+
+Fixing a few glitches we let out with 0.5.0!
+
+### Added
+
+- Basic Authentication and HMAC Authentication plugins now also send the `X-Credential-Username` to the upstream server.
+- Admin API now accept JSON when receiving a CORS request. [#580](https://github.com/Mashape/kong/pull/580)
+- Add a `WWW-Authenticate` header for HTTP 401 responses for basic-auth and key-auth. [#588](https://github.com/Mashape/kong/pull/588)
+
+### Changed
+
+- Protect Kong from POODLE SSL attacks by omitting SSLv3 (CVE-2014-3566). [#563](https://github.com/Mashape/kong/pull/563)
+- Remove support for key-auth key in body. [#566](https://github.com/Mashape/kong/pull/566)
+
+### Fixed
+
+- Plugins
+  - HMAC
+    - The migration for this plugin is now correctly being run. [#611](https://github.com/Mashape/kong/pull/611)
+    - Wrong username doesn't return HTTP 500 anymore, but 403. [#602](https://github.com/Mashape/kong/pull/602)
+  - JWT: `iss` not being found doesn't return HTTP 500 anymore, but 403. [#578](https://github.com/Mashape/kong/pull/578)
+  - OAuth2: client credentials flow does not include a refresh token anymore. [#562](https://github.com/Mashape/kong/issues/562)
+- Fix an occasional error when updating a plugin without a config. [#571](https://github.com/Mashape/kong/pull/571)
+
 ## [0.5.0] - 2015/09/25
 
 With new plugins, many improvements and bug fixes, this release comes with breaking changes that will require your attention.
@@ -310,7 +361,9 @@ First version running with Cassandra.
 - CLI `bin/kong` script.
 - Database migrations (using `db.lua`).
 
-[unreleased]: https://github.com/mashape/kong/compare/0.5.0...HEAD
+[unreleased]: https://github.com/mashape/kong/compare/0.5.2...next
+[0.5.2]: https://github.com/mashape/kong/compare/0.5.1...0.5.2
+[0.5.1]: https://github.com/mashape/kong/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/mashape/kong/compare/0.4.2...0.5.0
 [0.4.2]: https://github.com/mashape/kong/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/mashape/kong/compare/0.4.0...0.4.1

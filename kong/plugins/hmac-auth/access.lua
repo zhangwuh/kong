@@ -11,12 +11,14 @@ local ngx_parse_time = ngx.parse_http_time
 local ngx_sha1 = ngx.hmac_sha1
 local ngx_set_header = ngx.req.set_header
 local ngx_set_headers = ngx.req.get_headers
+local ngx_log = ngx.log
 
 local split = stringy.split
 
 local AUTHORIZATION = "authorization"
 local PROXY_AUTHORIZATION = "proxy-authorization"
 local DATE = "date"
+local X_DATE = "x-date"
 local SIGNATURE_NOT_VALID = "HMAC signature cannot be verified"
 
 local _M = {}
@@ -28,14 +30,14 @@ local function retrieve_hmac_fields(request, headers, header_name, conf)
   if authorization_header then
     local iterator, iter_err = ngx_gmatch(authorization_header, "\\s*[Hh]mac\\s*username=\"(.+)\",\\s*algorithm=\"(.+)\",\\s*headers=\"(.+)\",\\s*signature=\"(.+)\"")
     if not iterator then
-      ngx.log(ngx.ERR, iter_err)
+      ngx_log(ngx.ERR, iter_err)
       return
     end
 
     local m, err = iterator()
     if err then
-      ngx.log(ngx.ERR, err)
-      return 
+      ngx_log(ngx.ERR, err)
+      return
     end
 
     if m and #m >= 4 then
@@ -65,7 +67,7 @@ local function create_hash(request, hmac_params, headers)
     if not header_value then
       if header == "request-line" then
         -- request-line in hmac headers list
-        signing_string = signing_string..split(request.raw_header(), "\r\n")[1] 
+        signing_string = signing_string..split(request.raw_header(), "\r\n")[1]
       else
         signing_string = signing_string..header..":"
       end
@@ -74,9 +76,8 @@ local function create_hash(request, hmac_params, headers)
     end
     if i < count then
       signing_string = signing_string.."\n"
-    end       
+    end
   end
-
   return ngx_sha1(hmac_params.secret, signing_string)
 end
 
@@ -91,10 +92,10 @@ local function hmacauth_credential_key(username)
   return "hmacauth_credentials/"..username
 end
 
-local function load_secret(username)
-  local secret
+local function load_credential(username)
+  local credential
   if username then
-      secret = cache.get_or_set(hmacauth_credential_key(username), function()
+      credential = cache.get_or_set(hmacauth_credential_key(username), function()
       local keys, err = dao.hmacauth_credentials:find_by_keys { username = username }
       local result
       if err then
@@ -105,17 +106,17 @@ local function load_secret(username)
       return result
     end)
   end
-  return secret
+  return credential
 end
 
-local function validate_clock_skew(headers, allowed_clock_skew)
-  local date = headers[DATE]
+local function validate_clock_skew(headers, date_header_name, allowed_clock_skew)
+  local date = headers[date_header_name]
   if not date then
     return false
   end
 
-  local requestTime, err = ngx_parse_time(date)
-  if err then
+  local requestTime = ngx_parse_time(date)
+  if not requestTime then
     return false
   end
 
@@ -124,7 +125,7 @@ local function validate_clock_skew(headers, allowed_clock_skew)
     return false
   end
   return true
-end  
+end
 
 function _M.execute(conf)
   local headers = ngx_set_headers();
@@ -135,10 +136,10 @@ function _M.execute(conf)
   end
 
   -- validate clock skew
-  if not validate_clock_skew(headers, conf.clock_skew) then
-    responses.send_HTTP_FORBIDDEN("HMAC signature cannot be verified, a valid date field is required for HMAC Authentication")
+  if not (validate_clock_skew(headers, X_DATE, conf.clock_skew) or validate_clock_skew(headers, DATE, conf.clock_skew)) then
+      responses.send_HTTP_FORBIDDEN("HMAC signature cannot be verified, a valid date or x-date header is required for HMAC Authentication")
   end
-  
+
   -- retrieve hmac parameter from Proxy-Authorization header
   local hmac_params = retrieve_hmac_fields(ngx.req, headers, PROXY_AUTHORIZATION, conf)
   -- Try with the authorization header
@@ -150,16 +151,19 @@ function _M.execute(conf)
   end
 
   -- validate signature
-  local secret = load_secret(hmac_params.username)
-  hmac_params.secret = secret.secret
+  local credential = load_credential(hmac_params.username)
+  if not credential then
+    responses.send_HTTP_FORBIDDEN(SIGNATURE_NOT_VALID)
+  end
+  hmac_params.secret = credential.secret
   if not validate_signature(ngx.req, hmac_params, headers) then
     ngx.ctx.stop_phases = true -- interrupt other phases of this request
     return responses.send_HTTP_FORBIDDEN("HMAC signature does not match")
   end
 
   -- Retrieve consumer
-  local consumer = cache.get_or_set(cache.consumer_key(secret.consumer_id), function()
-    local result, err = dao.consumers:find_by_primary_key({ id = secret.consumer_id })
+  local consumer = cache.get_or_set(cache.consumer_key(credential.consumer_id), function()
+    local result, err = dao.consumers:find_by_primary_key({ id = credential.consumer_id })
     if err then
       return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
     end
@@ -169,7 +173,8 @@ function _M.execute(conf)
   ngx_set_header(constants.HEADERS.CONSUMER_ID, consumer.id)
   ngx_set_header(constants.HEADERS.CONSUMER_CUSTOM_ID, consumer.custom_id)
   ngx_set_header(constants.HEADERS.CONSUMER_USERNAME, consumer.username)
-  ngx.ctx.authenticated_entity = secret
+  ngx.req.set_header(constants.HEADERS.CREDENTIAL_USERNAME, credential.username)
+  ngx.ctx.authenticated_credential = credential
 end
 
 return _M

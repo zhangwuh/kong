@@ -30,7 +30,7 @@ local AUTHORIZE_URL = "^%s/oauth2/authorize/?$"
 local TOKEN_URL = "^%s/oauth2/token/?$"
 
 -- TODO: Expire token (using TTL ?)
-local function generate_token(conf, credential, authenticated_userid, scope, state, expiration)
+local function generate_token(conf, credential, authenticated_userid, scope, state, expiration, disable_refresh)
   local token_expiration = expiration or conf.token_expiration
 
   local token, err = dao.oauth2_tokens:insert({
@@ -44,11 +44,16 @@ local function generate_token(conf, credential, authenticated_userid, scope, sta
     return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
   end
 
+  local refresh_token = token_expiration > 0 and token.refresh_token or nil
+  if disable_refresh then
+    refresh_token = nil
+  end
+
   return {
     access_token = token.access_token,
     token_type = "bearer",
     expires_in = token_expiration > 0 and token.expires_in or nil,
-    refresh_token = token_expiration > 0 and token.refresh_token or nil,
+    refresh_token = refresh_token,
     state = state -- If state is nil, this value won't be added
   }
 end
@@ -71,7 +76,9 @@ local function get_redirect_uri(client_id)
 end
 
 local function is_https()
-  return ngx.var.scheme:lower() == "https"
+  local forwarded_proto_header = ngx.req.get_headers()["x-forwarded-proto"]
+
+  return ngx.var.scheme:lower() == "https" or (forwarded_proto_header and forwarded_proto_header:lower() == "https")
 end
 
 local function retrieve_parameters()
@@ -245,7 +252,7 @@ local function issue_token(conf)
         end
       elseif grant_type == GRANT_CLIENT_CREDENTIALS then
         -- Only check the provision_key if the authenticated_userid is being set
-        if parameters.authenticated_userid and conf.provision_key ~= parameters.provision_key then 
+        if parameters.authenticated_userid and conf.provision_key ~= parameters.provision_key then
           response_params = {[ERROR] = "invalid_provision_key", error_description = "Invalid Kong provision_key"}
         else
           -- Check scopes
@@ -253,7 +260,7 @@ local function issue_token(conf)
           if not ok then
             response_params = scopes -- If it's not ok, then this is the error message
           else
-            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state)
+            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state, conf.token_expiration, true)
           end
         end
       elseif grant_type == GRANT_PASSWORD then
@@ -407,7 +414,7 @@ function _M.execute(conf)
   ngx.req.set_header(constants.HEADERS.CONSUMER_USERNAME, consumer.username)
   ngx.req.set_header("x-authenticated-scope", token.scope)
   ngx.req.set_header("x-authenticated-userid", token.authenticated_userid)
-  ngx.ctx.authenticated_entity = credential
+  ngx.ctx.authenticated_credential = credential
 end
 
 return _M

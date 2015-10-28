@@ -24,7 +24,8 @@
 -- |[[    ]]|
 -- ==========
 
-local IO = require "kong.tools.io"
+local config = require "kong.tools.config_loader"
+local dao_loader = require "kong.tools.dao_loader"
 local utils = require "kong.tools.utils"
 local cache = require "kong.tools.database_cache"
 local stringy = require "stringy"
@@ -62,8 +63,6 @@ local function load_plugin(api_id, consumer_id, plugin_name)
 
   if plugin and not plugin.null and plugin.enabled then
     return plugin
-  else
-    return nil
   end
 end
 
@@ -136,7 +135,8 @@ end
 -- it will be thrown and needs to be catched in init_by_lua.
 function _M.init()
   -- Loading configuration
-  configuration, dao = IO.load_configuration_and_dao(os.getenv("KONG_CONF"))
+  configuration = config.load(os.getenv("KONG_CONF"))
+  dao = dao_loader.load(configuration)
 
   -- Initializing plugins
   plugins = init_plugins()
@@ -177,7 +177,7 @@ function _M.exec_plugins_access()
   for _, plugin_t in ipairs(plugins) do
     if ngx.ctx.api then
       ngx.ctx.plugin[plugin_t.name] = load_plugin(ngx.ctx.api.id, nil, plugin_t.name)
-      local consumer_id = ngx.ctx.authenticated_entity and ngx.ctx.authenticated_entity.consumer_id or nil
+      local consumer_id = ngx.ctx.authenticated_credential and ngx.ctx.authenticated_credential.consumer_id or nil
       if consumer_id then
         local app_plugin = load_plugin(ngx.ctx.api.id, consumer_id, plugin_t.name)
         if app_plugin then
