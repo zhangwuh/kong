@@ -16,7 +16,4 @@ test:
     pre:
         - make lint
     override:
-        - busted --exclude-tags=ci -o spec/busted-print.lua :
-            parallel: true
-            files:
-                - spec/**/*_spec.lua
+        - busted --exclude-tags=ci -o spec/busted-print.lua spec
