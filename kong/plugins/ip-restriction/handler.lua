@@ -18,6 +18,6 @@ function IpRestrictionHandler:access(conf)
   access.execute(conf)
 end
 
-IpRestrictionHandler.PRIORITY = 990
+IpRestrictionHandler.PRIORITY = 1002
 
 return IpRestrictionHandler

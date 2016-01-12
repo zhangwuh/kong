@@ -19,6 +19,7 @@ local CLIENT_SECRET = "client_secret"
 local REDIRECT_URI = "redirect_uri"
 local ACCESS_TOKEN = "access_token"
 local GRANT_TYPE = "grant_type"
+local EXPIRATION = "expiration"
 local GRANT_AUTHORIZATION_CODE = "authorization_code"
 local GRANT_CLIENT_CREDENTIALS = "client_credentials"
 local GRANT_REFRESH_TOKEN = "refresh_token"
@@ -53,6 +54,7 @@ local function generate_token(conf, credential, authenticated_userid, scope, sta
     access_token = token.access_token,
     token_type = "bearer",
     expires_in = token_expiration > 0 and token.expires_in or nil,
+    scope = token.scope,
     refresh_token = refresh_token,
     state = state -- If state is nil, this value won't be added
   }
@@ -91,10 +93,13 @@ local function retrieve_scopes(parameters, conf)
   local scope = parameters[SCOPE]
   local scopes = {}
   if conf.scopes and scope then
-    for v in scope:gmatch("%w+") do
+    -- for v in scope:gmatch("%w+") do
+    local scopes_in_param = stringy.split(scope, ",")
+    for _, vv in ipairs(scopes_in_param) do
+      local v = stringy.strip(vv)
       if not utils.table_contains(conf.scopes, v) then
         return false, {[ERROR] = "invalid_scope", error_description = "\""..v.."\" is an invalid "..SCOPE}
-      else
+      elseif v then
         table.insert(scopes, v)
       end
     end
@@ -215,6 +220,7 @@ local function issue_token(conf)
 
   local parameters = retrieve_parameters() --TODO: Also from authorization header
   local state = parameters[STATE]
+  local expiration = parameters[EXPIRATION] or conf.token_expiration
 
   if not is_https() then
     response_params = {[ERROR] = "access_denied", error_description = "You must use HTTPS"}
@@ -248,7 +254,7 @@ local function issue_token(conf)
         if not authorization_code then
           response_params = {[ERROR] = "invalid_request", error_description = "Invalid "..CODE}
         else
-          response_params = generate_token(conf, client, authorization_code.authenticated_userid, authorization_code.scope, state)
+          response_params = generate_token(conf, client, authorization_code.authenticated_userid, authorization_code.scope, state, expiration)
         end
       elseif grant_type == GRANT_CLIENT_CREDENTIALS then
         -- Only check the provision_key if the authenticated_userid is being set
@@ -260,7 +266,7 @@ local function issue_token(conf)
           if not ok then
             response_params = scopes -- If it's not ok, then this is the error message
           else
-            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state, conf.token_expiration, true)
+            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state, expiration, true)
           end
         end
       elseif grant_type == GRANT_PASSWORD then
@@ -275,7 +281,7 @@ local function issue_token(conf)
           if not ok then
             response_params = scopes -- If it's not ok, then this is the error message
           else
-            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state)
+            response_params = generate_token(conf, client, parameters.authenticated_userid, table.concat(scopes, " "), state, expiration)
           end
         end
       elseif grant_type == GRANT_REFRESH_TOKEN then
@@ -284,7 +290,7 @@ local function issue_token(conf)
         if not token then
           response_params = {[ERROR] = "invalid_request", error_description = "Invalid "..REFRESH_TOKEN}
         else
-          response_params = generate_token(conf, client, token.authenticated_userid, token.scope, state)
+          response_params = generate_token(conf, client, token.authenticated_userid, token.scope, state, expiration)
           dao.oauth2_tokens:delete({id=token.id}) -- Delete old token
         end
       end
@@ -361,6 +367,18 @@ local function parse_access_token(conf)
   return result
 end
 
+local function check_scope(token, conf)
+  local scopes_in_token = stringy.split(token.scope, ",")
+
+  for _, scope in ipairs(scopes_in_token) do
+    if utils.table_contains(conf.scopes, stringy.strip(scope)) then
+      return true
+    end
+  end
+
+  return false
+end
+
 function _M.execute(conf)
   -- Check if the API has a request_path and if it's being invoked with the path resolver
   local path_prefix = (ngx.ctx.api.request_path and stringy.startswith(ngx.var.request_uri, ngx.ctx.api.request_path)) and ngx.ctx.api.request_path or ""
@@ -377,6 +395,16 @@ function _M.execute(conf)
   end
 
   local token = retrieve_token(parse_access_token(conf))
+
+  if ngx.req.get_method() == "DELETE" and ngx.re.match(stringy.split(ngx.var.request_uri, "?")[1], string.format(TOKEN_URL, path_prefix)) then
+    if token then
+      dao.oauth2_tokens:delete({id=token.id}) -- Delete old token
+      responses.send_HTTP_NO_CONTENT("Revoke access token done")
+    else
+      responses.send_HTTP_NOT_FOUND("Access token not found ")
+    end
+  end
+
   if not token then
     ngx.ctx.stop_phases = true -- interrupt other phases of this request
     return responses.send_HTTP_FORBIDDEN("Invalid authentication credentials")
@@ -387,8 +415,13 @@ function _M.execute(conf)
     local now = timestamp.get_utc()
     if now - token.created_at > (token.expires_in * 1000) then
       ngx.ctx.stop_phases = true -- interrupt other phases of this request
-      return responses.send_HTTP_BAD_REQUEST({[ERROR] = "invalid_request", error_description = "access_token expired"})
+      return responses.send_HTTP_FORBIDDEN({[ERROR] = "invalid_request", error_description = "access_token expired"})
     end
+  end
+
+  local valid_scope = check_scope(token, conf)
+  if not valid_scope then
+    return responses.send_HTTP_FORBIDDEN("Your token is not allowed to access this API endpoint")
   end
 
   -- Retrive the credential from the token

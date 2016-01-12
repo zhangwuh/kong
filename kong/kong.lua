@@ -168,10 +168,45 @@ function _M.exec_plugins_certificate()
   return
 end
 
+local function Set(list)
+  local set = {}
+  for _, l in ipairs(list) do set[l] = true end
+  return set
+end
+
+local function is_for_oauth2_auth()
+  if not ngx.ctx.api then
+    return false
+  end
+
+  local req_uri = ngx.var.request_uri
+  local req_path = ngx.ctx.api.request_path
+  local path_prefix = (req_path and stringy.startswith(req_uri, req_path)) and req_path or ""
+  local AUTHORIZE_URL = "^%s/oauth2/authorize/?$"
+  local TOKEN_URL = "^%s/oauth2/token/?$"
+
+  if stringy.endswith(path_prefix, "/") then
+    path_prefix = path_prefix:sub(1, path_prefix:len() - 1)
+  end
+
+  if ngx.req.get_method() == "POST" then
+    if ngx.re.match(req_uri, string.format(AUTHORIZE_URL, path_prefix)) or ngx.re.match(req_uri, string.format(TOKEN_URL, path_prefix)) then
+      return true
+    end
+  end
+
+  if ngx.req.get_method() == "DELETE" and ngx.re.match(stringy.split(req_uri, "?")[1], string.format(TOKEN_URL, path_prefix)) then
+    return true
+  end
+
+  return false
+end
 -- Calls `access()` on every loaded plugin
 function _M.exec_plugins_access()
   local start = get_now()
   ngx.ctx.plugin = {}
+  ngx.ctx.stop_auth = false
+  local auth_plugins = Set {"oauth2", "key-auth", "basic-auth", "hmac-auth", "api-acl"}
 
   -- Iterate over all the plugins
   for _, plugin_t in ipairs(plugins) do
@@ -187,7 +222,10 @@ function _M.exec_plugins_access()
     end
 
     local plugin = ngx.ctx.plugin[plugin_t.name]
-    if not ngx.ctx.stop_phases and (plugin_t.resolver or plugin) then
+
+    if ngx.ctx.stop_auth and auth_plugins[plugin_t.name] and (not is_for_oauth2_auth()) then
+      print("Ignore auth plugin: ", plugin_t.name)
+    elseif not ngx.ctx.stop_phases and (plugin_t.resolver or plugin) then
       plugin_t.handler:access(plugin and plugin.config or {})
     end
   end

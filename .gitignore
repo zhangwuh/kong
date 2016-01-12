@@ -11,3 +11,4 @@ kong*.yml
 # luacov
 luacov.*
 /doc
+*.iml

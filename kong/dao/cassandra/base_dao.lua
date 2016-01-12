@@ -374,6 +374,10 @@ function BaseDao:insert(t)
     return nil, DaoError(errors, error_types.SCHEMA)
   end
 
+  if t["access_token"] then
+    print("INSERT ACCESS TOKEN, ", t["access_token"])
+    print("INSERT REFRESH TOKEN, ", t["refresh_token"])
+  end
   ok, errors, db_err = self:check_unique_fields(t)
   if db_err then
     return nil, DaoError(db_err, error_types.DATABASE)
