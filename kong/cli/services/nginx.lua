@@ -52,10 +52,15 @@ local function prepare_ssl_certificates(configuration)
            trusted_ssl_cert_path = trusted_ssl_cert_path }
 end
 
+local function get_current_user()
+  return IO.os_execute("whoami")
+end
+
 local function prepare_nginx_configuration(configuration, ssl_config)
   -- Extract nginx config from kong config, replace any needed value
   local nginx_config = configuration.nginx
   local nginx_inject = {
+    user = get_current_user(),
     proxy_listen = configuration.proxy_listen,
     proxy_listen_ssl = configuration.proxy_listen_ssl,
     admin_api_listen = configuration.admin_api_listen,
