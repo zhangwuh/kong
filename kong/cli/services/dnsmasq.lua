@@ -27,7 +27,7 @@ function Dnsmasq:start()
     end
 
     -- dnsmasq always listens on the local 127.0.0.1 address
-    local res, code = IO.os_execute(cmd.." -p "..self._configuration.dns_resolver.port.." --pid-file="..self._pid_file_path.." -N -o")    
+    local res, code = IO.os_execute(cmd.." -p "..self._configuration.dns_resolver.port.." --pid-file="..self._pid_file_path.." -N -o --listen-address=127.0.0.1")    
     if code == 0 then
       while not self:is_running() do
         -- Wait for PID file to be created
