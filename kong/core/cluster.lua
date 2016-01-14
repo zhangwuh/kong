@@ -28,34 +28,44 @@ local function async_autojoin(premature)
   -- information into the datastore yet. When the second node starts up, there is nothing to join yet.
   if not configuration.cluster["auto-join"] then return end
 
-  -- If the current member count on this node's cluster is 1, but there are more than 1 active nodes in 
-  -- the DAO, then try to join them
-  local count, err = dao.nodes:count_by_keys()
-  if err then
-    ngx.log(ngx.ERR, tostring(err))
-  elseif count > 1 then
-
-    local serf = Serf(configuration)
-    local res, err = serf:invoke_signal("members", {["-format"] = "json"})
+  local lock = resty_lock:new("cluster_autojoin_locks", {
+    exptime = ASYNC_AUTOJOIN_INTERVAL - 0.001
+  })
+  local elapsed = lock:lock("async_autojoin")
+  if elapsed and elapsed == 0 then
+    -- If the current member count on this node's cluster is 1, but there are more than 1 active nodes in 
+    -- the DAO, then try to join them
+    local count, err = dao.nodes:count_by_keys()
     if err then
       ngx.log(ngx.ERR, tostring(err))
-    end
-
-    local members = cjson.decode(res).members
-    if #members < 2 then
-      -- Trigger auto-join
-      local _, err = serf:_autojoin(cluster_utils.get_node_name(configuration))
+    elseif count > 1 then
+      local serf = Serf(configuration)
+      local res, err = serf:invoke_signal("members", {["-format"] = "json"})
       if err then
         ngx.log(ngx.ERR, tostring(err))
       end
-    else
-      return -- The node is already in the cluster and no need to continue
-    end
-  end
 
-  local autojoin_retries = cache.incr(cache.autojoin_retries_key(), 1) -- Increment retries counter
-  if (autojoin_retries < ASYNC_AUTOJOIN_RETRIES) then
-    create_timer(ASYNC_AUTOJOIN_INTERVAL, async_autojoin)
+      local members = cjson.decode(res).members
+      if #members < 2 then
+        -- Trigger auto-join
+        local _, err = serf:_autojoin(cluster_utils.get_node_name(configuration))
+        if err then
+          ngx.log(ngx.ERR, tostring(err))
+        end
+      else
+        return -- The node is already in the cluster and no need to continue
+      end
+    end
+
+    -- Create retries counter key if it doesn't exist
+    if not cache.get(cache.autojoin_retries_key()) then
+      cache.rawset(cache.autojoin_retries_key(), 0)
+    end
+
+    local autojoin_retries = cache.incr(cache.autojoin_retries_key(), 1) -- Increment retries counter
+    if (autojoin_retries < ASYNC_AUTOJOIN_RETRIES) then
+      create_timer(ASYNC_AUTOJOIN_INTERVAL, async_autojoin)
+    end
   end
 end
 
