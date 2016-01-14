@@ -119,6 +119,9 @@ function CassandraFactory:get_session_options()
     query_options = {
       prepare = true
     },
+    protocol_options = {
+      max_schema_consensus_wait = 15000
+    },
     username = self.properties.username,
     password = self.properties.password,
     ssl_options = {
