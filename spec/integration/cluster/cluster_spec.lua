@@ -313,7 +313,7 @@ describe("Cluster", function()
     assert.equal(404, status)
 
     -- Joining the nodes in the same cluster
-    local _, exit_code = spec_helper.cluster_join(SERVER_CONF, "127.0.0.1:9100")
+    local _, exit_code = IO.os_execute("serf join -rpc-addr=127.0.0.1:9101 join 127.0.0.1:9946")
     assert.are.same(0, exit_code)
     -- Wait for join to complete
     local total
