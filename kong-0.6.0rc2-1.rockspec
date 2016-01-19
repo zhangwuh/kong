@@ -14,12 +14,12 @@ dependencies = {
   "luasec ~> 0.5-2",
 
   "lua_uuid ~> 0.2.0-2",
-  "lua_system_constants ~> 0.1-3",
+  "lua_system_constants ~> 0.1.1-0",
   "luatz ~> 0.3-1",
   "yaml ~> 1.1.2-1",
   "lapis ~> 1.3.1-1",
   "stringy ~> 0.4-1",
-  "lua-cassandra ~> 0.4.1-0",
+  "lua-cassandra ~> 0.4.2-0",
   "multipart ~> 0.2-1",
   "lua-path ~> 0.2.3-1",
   "lua-cjson ~> 2.1.0-1",
@@ -107,6 +107,15 @@ build = {
     ["kong.dao.cassandra.consumers"] = "kong/dao/cassandra/consumers.lua",
     ["kong.dao.cassandra.plugins"] = "kong/dao/cassandra/plugins.lua",
 
+    ["kong.api.app"] = "kong/api/app.lua",
+    ["kong.api.crud_helpers"] = "kong/api/crud_helpers.lua",
+    ["kong.api.route_helpers"] = "kong/api/route_helpers.lua",
+    ["kong.api.routes.kong"] = "kong/api/routes/kong.lua",
+    ["kong.api.routes.apis"] = "kong/api/routes/apis.lua",
+    ["kong.api.routes.consumers"] = "kong/api/routes/consumers.lua",
+    ["kong.api.routes.plugins"] = "kong/api/routes/plugins.lua",
+    ["kong.api.routes.plugins"] = "kong/api/routes/plugins.lua",
+
     ["kong.plugins.base_plugin"] = "kong/plugins/base_plugin.lua",
 
     ["kong.plugins.basic-auth.schema.migrations"] = "kong/plugins/basic-auth/schema/migrations.lua",
@@ -120,7 +129,6 @@ build = {
 
     ["kong.plugins.key-auth.schema.migrations"] = "kong/plugins/key-auth/schema/migrations.lua",
     ["kong.plugins.key-auth.handler"] = "kong/plugins/key-auth/handler.lua",
-    ["kong.plugins.key-auth.access"] = "kong/plugins/key-auth/access.lua",
     ["kong.plugins.key-auth.hooks"] = "kong/plugins/key-auth/hooks.lua",
     ["kong.plugins.key-auth.schema"] = "kong/plugins/key-auth/schema.lua",
     ["kong.plugins.key-auth.api"] = "kong/plugins/key-auth/api.lua",
@@ -138,21 +146,16 @@ build = {
     ["kong.plugins.log-serializers.alf"] = "kong/plugins/log-serializers/alf.lua",
 
     ["kong.plugins.tcp-log.handler"] = "kong/plugins/tcp-log/handler.lua",
-    ["kong.plugins.tcp-log.log"] = "kong/plugins/tcp-log/log.lua",
     ["kong.plugins.tcp-log.schema"] = "kong/plugins/tcp-log/schema.lua",
 
     ["kong.plugins.udp-log.handler"] = "kong/plugins/udp-log/handler.lua",
-    ["kong.plugins.udp-log.log"] = "kong/plugins/udp-log/log.lua",
     ["kong.plugins.udp-log.schema"] = "kong/plugins/udp-log/schema.lua",
 
     ["kong.plugins.http-log.handler"] = "kong/plugins/http-log/handler.lua",
-    ["kong.plugins.http-log.log"] = "kong/plugins/http-log/log.lua",
     ["kong.plugins.http-log.schema"] = "kong/plugins/http-log/schema.lua",
 
     ["kong.plugins.file-log.handler"] = "kong/plugins/file-log/handler.lua",
     ["kong.plugins.file-log.schema"] = "kong/plugins/file-log/schema.lua",
-    ["kong.plugins.file-log.log"] = "kong/plugins/file-log/log.lua",
-    ["kong.plugins.file-log.fd_util"] = "kong/plugins/file-log/fd_util.lua",
 
     ["kong.plugins.mashape-analytics.schema.migrations"] = "kong/plugins/mashape-analytics/schema/migrations.lua",
     ["kong.plugins.mashape-analytics.handler"] = "kong/plugins/mashape-analytics/handler.lua",
@@ -161,7 +164,6 @@ build = {
 
     ["kong.plugins.rate-limiting.schema.migrations"] = "kong/plugins/rate-limiting/schema/migrations.lua",
     ["kong.plugins.rate-limiting.handler"] = "kong/plugins/rate-limiting/handler.lua",
-    ["kong.plugins.rate-limiting.access"] = "kong/plugins/rate-limiting/access.lua",
     ["kong.plugins.rate-limiting.schema"] = "kong/plugins/rate-limiting/schema.lua",
     ["kong.plugins.rate-limiting.daos"] = "kong/plugins/rate-limiting/daos.lua",
 
@@ -174,7 +176,6 @@ build = {
     ["kong.plugins.response-ratelimiting.daos"] = "kong/plugins/response-ratelimiting/daos.lua",
 
     ["kong.plugins.request-size-limiting.handler"] = "kong/plugins/request-size-limiting/handler.lua",
-    ["kong.plugins.request-size-limiting.access"] = "kong/plugins/request-size-limiting/access.lua",
     ["kong.plugins.request-size-limiting.schema"] = "kong/plugins/request-size-limiting/schema.lua",
 
     ["kong.plugins.request-transformer.handler"] = "kong/plugins/request-transformer/handler.lua",
@@ -187,24 +188,18 @@ build = {
     ["kong.plugins.response-transformer.schema"] = "kong/plugins/response-transformer/schema.lua",
 
     ["kong.plugins.cors.handler"] = "kong/plugins/cors/handler.lua",
-    ["kong.plugins.cors.access"] = "kong/plugins/cors/access.lua",
     ["kong.plugins.cors.schema"] = "kong/plugins/cors/schema.lua",
 
     ["kong.plugins.ssl.handler"] = "kong/plugins/ssl/handler.lua",
-    ["kong.plugins.ssl.certificate"] = "kong/plugins/ssl/certificate.lua",
-    ["kong.plugins.ssl.access"] = "kong/plugins/ssl/access.lua",
     ["kong.plugins.ssl.hooks"] = "kong/plugins/ssl/hooks.lua",
     ["kong.plugins.ssl.ssl_util"] = "kong/plugins/ssl/ssl_util.lua",
     ["kong.plugins.ssl.schema"] = "kong/plugins/ssl/schema.lua",
 
     ["kong.plugins.ip-restriction.handler"] = "kong/plugins/ip-restriction/handler.lua",
-    ["kong.plugins.ip-restriction.init_worker"] = "kong/plugins/ip-restriction/init_worker.lua",
-    ["kong.plugins.ip-restriction.access"] = "kong/plugins/ip-restriction/access.lua",
     ["kong.plugins.ip-restriction.schema"] = "kong/plugins/ip-restriction/schema.lua",
 
     ["kong.plugins.acl.schema.migrations"] = "kong/plugins/acl/schema/migrations.lua",
     ["kong.plugins.acl.handler"] = "kong/plugins/acl/handler.lua",
-    ["kong.plugins.acl.access"] = "kong/plugins/acl/access.lua",
     ["kong.plugins.acl.schema"] = "kong/plugins/acl/schema.lua",
     ["kong.plugins.acl.hooks"] = "kong/plugins/acl/hooks.lua",
     ["kong.plugins.acl.api"] = "kong/plugins/acl/api.lua",
@@ -222,7 +217,6 @@ build = {
 
     ["kong.plugins.jwt.schema.migrations"] = "kong/plugins/jwt/schema/migrations.lua",
     ["kong.plugins.jwt.handler"] = "kong/plugins/jwt/handler.lua",
-    ["kong.plugins.jwt.access"] = "kong/plugins/jwt/access.lua",
     ["kong.plugins.jwt.schema"] = "kong/plugins/jwt/schema.lua",
     ["kong.plugins.jwt.hooks"] = "kong/plugins/jwt/hooks.lua",
     ["kong.plugins.jwt.api"] = "kong/plugins/jwt/api.lua",
@@ -238,11 +232,9 @@ build = {
     ["kong.plugins.hmac-auth.daos"] = "kong/plugins/hmac-auth/daos.lua",
 
     ["kong.plugins.syslog.handler"] = "kong/plugins/syslog/handler.lua",
-    ["kong.plugins.syslog.log"] = "kong/plugins/syslog/log.lua",
     ["kong.plugins.syslog.schema"] = "kong/plugins/syslog/schema.lua",
 
     ["kong.plugins.loggly.handler"] = "kong/plugins/loggly/handler.lua",
-    ["kong.plugins.loggly.log"] = "kong/plugins/loggly/log.lua",
     ["kong.plugins.loggly.schema"] = "kong/plugins/loggly/schema.lua",
 
     ["kong.plugins.datadog.handler"] = "kong/plugins/datadog/handler.lua",
