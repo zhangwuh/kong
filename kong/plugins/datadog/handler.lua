@@ -27,6 +27,11 @@ local function request_size_gauge(api_name, message, logger)
   logger:gauge(stat, message.request.size, 1)
 end
 
+local function response_size_gauge(api_name, message, logger)
+  local stat = api_name..".response.size"
+  logger:gauge(stat, message.response.size, 1)
+end
+
 local function latency_gauge(api_name, message, logger)
   local stat = api_name..".latency"
   logger:gauge(stat, message.latencies.request, 1)
@@ -45,6 +50,9 @@ local function log(premature, conf, message)
   for _, metric in pairs(conf.metrics) do
     if metric == "request_size" then
       request_size_gauge(api_name, message, logger)
+    end
+    if metric == "response_size" then
+      response_size_gauge(api_name, message, logger)
     end
     if metric == "status_count" then
       status_counter(api_name, message, logger)
