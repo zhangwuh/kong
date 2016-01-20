@@ -1,5 +1,26 @@
 ## [Unreleased][unreleased]
 
+## [0.5.4] - 2015/12/03
+
+### Fixed
+
+- Mashape Analytics plugin (aka Galileo):
+  - Improve stability under heavy load. [#757](https://github.com/Mashape/kong/issues/757)
+  - base64 encode ALF request/response bodies, enabling proper support for Galileo bodies inspection capabilities. [#747](https://github.com/Mashape/kong/pull/747)
+  - Do not include JSON bodies in ALF `postData.params` field. [#766](https://github.com/Mashape/kong/pull/766)
+
+## [0.5.3] - 2015/11/16
+
+### Fixed
+
+- Avoids additional URL encoding when proxying to an upstream service. [#691](https://github.com/Mashape/kong/pull/691)
+- Fixing potential timing comparison bug in HMAC plugin. [#704](https://github.com/Mashape/kong/pull/704)
+- Fixed a missing "env" statement in the Nginx configuration. [#706](https://github.com/Mashape/kong/pull/706)
+
+### Added
+
+- The Galileo plugin now supports arbitrary host, port and path values. [#721](https://github.com/Mashape/kong/pull/721)
+
 ## [0.5.2] - 2015/10/21
 
 A few fixes requested by the community!
@@ -346,7 +367,9 @@ First version running with Cassandra.
 - CLI `bin/kong` script.
 - Database migrations (using `db.lua`).
 
-[unreleased]: https://github.com/mashape/kong/compare/0.5.2...next
+[unreleased]: https://github.com/mashape/kong/compare/0.5.4...next
+[0.5.4]: https://github.com/mashape/kong/compare/0.5.3...0.5.4
+[0.5.3]: https://github.com/mashape/kong/compare/0.5.2...0.5.3
 [0.5.2]: https://github.com/mashape/kong/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/mashape/kong/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/mashape/kong/compare/0.4.2...0.5.0

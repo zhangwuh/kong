@@ -1,3 +1,4 @@
+require "kong.tools.ngx_stub"
 local fixtures = require "spec.plugins.mashape-analytics.fixtures.requests"
 local ALFSerializer = require "kong.plugins.log-serializers.alf"
 
@@ -89,8 +90,8 @@ describe("ALF serializer", function()
       assert.truthy(alf.har.log)
       assert.equal("1.2", alf.har.log.version)
       assert.truthy(alf.har.log.creator)
-      assert.equal("mashape-analytics-agent-kong", alf.har.log.creator.name)
-      assert.equal("1.0.2", alf.har.log.creator.version)
+      assert.equal("galileo-agent-kong", alf.har.log.creator.name)
+      assert.equal("1.1.0", alf.har.log.creator.version)
       assert.truthy(alf.har.log.entries)
       assert.equal(1, #(alf.har.log.entries))
     end)
