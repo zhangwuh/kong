@@ -22,7 +22,7 @@ function _M.execute(conf)
 
     for _, v in pairs(conf.blacklist) do
       print("API ENDPOINT IN BLACKLIST: ", v)
-      if stringy.endswith(api_path, v) or stringy.endswith(api_path, v .. "/") then
+      if stringy.endswith(api_path, v) or stringy.endswith(api_path, v .. "/") or stringy.find(api_path,"/internal/") then
         print("API IS BLOCKED DUE TO BALCKLIST", api_path, v)
         block = true;
       end
